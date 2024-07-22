@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Predictor</title>
+</head>
+<body>
+    <h1>Stock Price Predictor</h1>
+    
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+        <label for="stock_symbol">Stock Symbol:</label>
+        <input type="text" id="stock_symbol" name="stock_symbol">
+        <input type="file" name="model">
+        <button type="submit">Upload Model</button>
+    </form>
+
+    <hr>
+
+    <form id="predict-form" action="/predict" method="post">
+        <label for="stock_symbol">Stock Symbol:</label>
+        <input type="text" id="stock_symbol" name="stock_symbol">
+        <button type="submit">Predict Next Price</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('upload-form').onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        };
+
+        document.getElementById('predict-form').onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = result.error ? result.error : `
+                <p>Stock Symbol: ${result.stock_symbol}</p>
+                <p>Current Price: ${result.current_price}</p>
+                <p>Predicted Price: ${result.predicted_price}</p>
+            `;
+        };
+    </script>
+</body>
+</html>
