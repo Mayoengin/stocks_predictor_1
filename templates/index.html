@@ -8,35 +8,19 @@
 <body>
     <h1>Stock Price Predictor</h1>
     
-    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-        <label for="stock_symbol">Stock Symbol:</label>
-        <input type="text" id="stock_symbol" name="stock_symbol">
-        <input type="file" name="model">
-        <button type="submit">Upload Model</button>
-    </form>
-
-    <hr>
-
     <form id="predict-form" action="/predict" method="post">
-        <label for="stock_symbol">Stock Symbol:</label>
-        <input type="text" id="stock_symbol" name="stock_symbol">
-        <button type="submit">Predict Next Price</button>
+        <label for="stock_symbol">Choose a Stock Symbol:</label>
+        <select id="stock_symbol" name="stock_symbol">
+            <option value="AAPL">AAPL</option>
+            <option value="GOOGL">GOOGL</option>
+            <option value="MSFT">MSFT</option>
+        </select>
+        <button type="submit">Predict Next 5 Prices</button>
     </form>
 
     <div id="result"></div>
 
     <script>
-        document.getElementById('upload-form').onsubmit = async function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            alert(result.message || result.error);
-        };
-
         document.getElementById('predict-form').onsubmit = async function(event) {
             event.preventDefault();
             const formData = new FormData(this);
@@ -48,7 +32,10 @@
             document.getElementById('result').innerHTML = result.error ? result.error : `
                 <p>Stock Symbol: ${result.stock_symbol}</p>
                 <p>Current Price: ${result.current_price}</p>
-                <p>Predicted Price: ${result.predicted_price}</p>
+                <p>Predicted Prices for the next 5 time steps:</p>
+                <ul>
+                    ${result.predicted_prices.map(price => `<li>${price}</li>`).join('')}
+                </ul>
             `;
         };
     </script>
