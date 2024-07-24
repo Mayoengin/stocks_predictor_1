@@ -7,11 +7,11 @@ import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 import joblib
 
-# Define or import the custom metric function
+# Define the custom metric function
 def mse(y_true, y_pred):
     return tf.reduce_mean(tf.square(y_pred - y_true))
 
-# Register the custom metric
+# Register the custom metric function
 tf.keras.utils.get_custom_objects().update({'mse': mse})
 
 # Initialize Flask app
@@ -42,10 +42,10 @@ def fetch_stock_data(ticker):
 def preprocess_data(data, scaler):
     try:
         print(f"Raw data: {data}")
-        # Normalize the data using the same scaler used during training
-        data = scaler.transform(data.reshape(-1, 1))
-        print(f"Scaled data: {data}")
-        data = data.reshape((1, -1, 1))
+        data = np.array(data).reshape(-1, 1)  # Ensure data is a 2D array
+        scaled_data = scaler.transform(data)
+        print(f"Scaled data: {scaled_data}")
+        data = scaled_data.reshape((1, scaled_data.shape[0], 1))
         return data
     except Exception as e:
         print(f"Error preprocessing data: {e}")
@@ -73,7 +73,7 @@ def predict():
     if stock_data is None:
         return jsonify({'error': 'Error fetching stock data'}), 500
     
-    preprocessed_data = preprocess_data(stock_data, scaler)
+    preprocessed_data = preprocess_data(stock_data[-3:], scaler)  # Use last 3 days of closing prices
     if preprocessed_data is None:
         return jsonify({'error': 'Error preprocessing data'}), 500
     
@@ -84,7 +84,7 @@ def predict():
         prediction = model.predict(preprocessed_data)
         print(f"Raw prediction for {stock}: {prediction}")
         
-        # Assuming the prediction is a single value
+        # Inverse transform the prediction
         next_day_price = scaler.inverse_transform(prediction)[0, 0]  # Convert back to original scale
         next_day_price = float(next_day_price)  # Convert to standard Python float
 

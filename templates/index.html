@@ -150,28 +150,40 @@
                 // Set up the chart
                 var ctx = document.getElementById('stockChart').getContext('2d');
                 var labels = Array.from({length: currentPrices.length + predictedPrices.length}, (_, i) => i + 1);
-                var stockChart = new Chart(ctx, {
+
+                // Create datasets
+                var currentData = {
+                    label: 'Current Prices',
+                    data: currentPrices,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false,
+                    tension: 0.1
+                };
+
+                var predictedData = {
+                    label: 'Predicted Price',
+                    data: Array(currentPrices.length).fill(null).concat(predictedPrices),
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,
+                    tension: 0.1
+                };
+
+                var connectingLineData = {
+                    label: 'Connecting Line',
+                    data: Array(currentPrices.length - 1).fill(null).concat([currentPrices[currentPrices.length - 1], predictedPrices[0]]),
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false,
+                    borderDash: [5, 5]
+                };
+
+                // Chart configuration
+                var config = {
                     type: 'line',
                     data: {
                         labels: labels,
-                        datasets: [
-                            {
-                                label: 'Current Prices',
-                                data: currentPrices,
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                fill: false,
-                                tension: 0.1
-                            },
-                            {
-                                label: 'Predicted Prices',
-                                data: Array(currentPrices.length).fill(null).concat(predictedPrices),
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: false,
-                                tension: 0.1
-                            }
-                        ]
+                        datasets: [currentData, predictedData, connectingLineData]
                     },
                     options: {
                         responsive: true,
@@ -185,7 +197,10 @@
                             }
                         }
                     }
-                });
+                };
+
+                // Create the chart
+                var stockChart = new Chart(ctx, config);
             })
             .catch(error => {
                 spinner.style.display = 'none'; // Hide loading spinner
