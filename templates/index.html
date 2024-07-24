@@ -130,7 +130,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ stock_symbol: stockSymbol })
+                body: JSON.stringify({ stock: stockSymbol })
             })
             .then(response => response.json())
             .then(data => {
